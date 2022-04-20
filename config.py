@@ -34,6 +34,7 @@ HEALTH_BAR_SIZE = (60, 8)
 
 SPACESHIP_WIDTH, SPACESHIP_HEIGHT = 45, 35
 COMMANDER_WIDTH, COMMANDER_HEIGTH = 60, 55
+MISSILE_WIDTH, MISSILE_HEIGHT = 20, 16
 
 FACTION_1_SPACESHIP_IMAGE = pygame.image.load(
     os.path.join('assets', 'faction1', 'blueshuttlenoweps.png'))
@@ -45,6 +46,11 @@ FACTION_1_COMMANDER_IMAGE = pygame.image.load(
 FACTION_1_COMMANDER = pygame.transform.scale(
     FACTION_1_COMMANDER_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT))
 
+PROJECTILES_1_MISSILE_IMAGE = pygame.image.load(
+    os.path.join('assets', 'projectiles', 'Blood-Magic-Effect_03.png'))
+PROJECTILES_1_MISSILE = pygame.transform.scale(
+    PROJECTILES_1_MISSILE_IMAGE, (MISSILE_WIDTH, MISSILE_HEIGHT))
+
 FACTION_2_SPACESHIP_IMAGE = pygame.image.load(
     os.path.join('assets', 'faction2', 'cruiser.png'))
 FACTION_2_SPACESHIP = pygame.transform.rotate(pygame.transform.scale(
@@ -55,8 +61,14 @@ FACTION_2_COMMANDER_IMAGE = pygame.image.load(
 FACTION_2_COMMANDER = pygame.transform.rotate(pygame.transform.scale(
     FACTION_2_COMMANDER_IMAGE, (SPACESHIP_WIDTH, SPACESHIP_HEIGHT)), 180)
 
+PROJECTILES_2_MISSILE_IMAGE = pygame.image.load(
+    os.path.join('assets', 'projectiles', 'Blood-Magic-Effect_12.png'))
+PROJECTILES_2_MISSILE = pygame.transform.rotate(pygame.transform.scale(
+    PROJECTILES_2_MISSILE_IMAGE, (MISSILE_WIDTH, MISSILE_HEIGHT)), 180)
+
 SHIP_RADIUS = 6
 SHIP_VELOCITY = 2
+MISSILE_VELOCITY = 2
 MAX_HEALTH = 100
 SPACE_WIDTH = 0.15 * WINDOW_WIDTH
 MIN_DISTANCE = 10

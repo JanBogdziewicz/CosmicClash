@@ -77,6 +77,12 @@ class Game(object):
                 self.draw_id(
                     ship.id, (ship.position[X] - (HEALTH_BAR_SIZE[0]-SPACESHIP_WIDTH)/2 - 10, ship.position[Y] - 20), ship.color)
 
+    def draw_missiles(self):
+        for player in self.players:
+            for ship in player.fleet:
+                for missile in ship.missiles:
+                    WIN.blit(missile.sprite, (missile.position[X], missile.position[Y]))
+
     def draw_health_bar(self, position, size, fill_level):
         pygame.draw.rect(WIN, BLACK, (*position, *size), 1)
         innerPos = (position[0]+2, position[1]+2)
@@ -102,6 +108,7 @@ class Game(object):
         WIN.blit(BACKGROUND, (0, 0))
         self.draw_obstacles()
         self.draw_ships()
+        self.draw_missiles()
         pygame.display.update()
 
     def draw_menu(self):

@@ -41,5 +41,11 @@ class ShipThread(threading.Thread):
 
             if self.main:
                 self.ship.controlMovement(pygame.key.get_pressed())
+                self.ship.shootMissile(pygame.key.get_pressed())
             else:
                 self.ship.randomMovement()
+
+            for missile in self.ship.missiles:
+                exist = missile.move()
+                if not exist:
+                    self.ship.missiles.remove(missile)

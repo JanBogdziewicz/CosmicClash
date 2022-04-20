@@ -16,7 +16,7 @@ class Player():
         self.width = width
         self.height = height
         self.color = color
-        self.rect = (x,y,width,height)
+        self.rect = (x, y, width, height)
         self.vel = 3
 
     def draw(self, win):

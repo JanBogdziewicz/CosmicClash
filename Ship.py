@@ -2,14 +2,17 @@ import pygame
 import math
 from config import *
 from Object import Object
+from Missile import Missile
 
 
 class Ship(Object):
 
-    def __init__(self, x, y, space, velocity, sprite, id):
+    def __init__(self, x, y, space, velocity, sprite, missile_sprite, id):
         self.id = id
         self.color = RED
         super().__init__(x, y, space, velocity, sprite)
+        self.missile_sprite = missile_sprite
+        self.missiles = []
 
     def controlMovement(self, keys_pressed):
         # UP
@@ -27,6 +30,11 @@ class Ship(Object):
         # RIGHT
         if keys_pressed[pygame.K_RIGHT] and self.inSpace(self.position[X]+self.velocity, self.position[Y]):
             self.position[X] += self.velocity
+
+    def shootMissile(self, keys_pressed):
+        if keys_pressed[pygame.K_SPACE]:
+            missile = Missile(self.position[X], self.position[Y], self.space, MISSILE_VELOCITY, self.missile_sprite)
+            self.missiles.append(missile)
 
     def randomMovement(self):
         v_x = math.cos(self.directionAngle) * self.velocity
