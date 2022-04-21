@@ -19,6 +19,7 @@ class ShipThread(threading.Thread):
         self.q = q
         self.main = main
         self.current_key = None
+        self.cooldown = 20
 
     def get_current_key(self, key):
         self.current_key = key
@@ -27,6 +28,11 @@ class ShipThread(threading.Thread):
         clock = pygame.time.Clock()
         while True:
             clock.tick(FPS)
+            if self.cooldown == 0:
+                self.ship.missile_cooldown = False
+                self.cooldown = 20
+            else:
+                self.cooldown -= 1
 
             if self.current_key == THREAD_KEYS[self.threadID] and self.main:
                 self.q.put(True)
