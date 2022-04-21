@@ -61,7 +61,7 @@ class Game(object):
             index = random.randrange(0, 7)
             x, y = self.obstacle_random_start_position()
             obstacles.append(Asteroid(x, y, ASTEROID_SPACE,
-                             SHIP_VELOCITY, self.asteroid_list[index]))
+                             SHIP_VELOCITY/1.5, self.asteroid_list[index]))
         return obstacles
 
     def draw_obstacles(self):
