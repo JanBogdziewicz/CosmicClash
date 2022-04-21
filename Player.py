@@ -18,12 +18,16 @@ class Player(object):
             x = space.x + (space.width / 2)
             y = space.y + (i + 0.5) * (space.height / shipsNumber)
             main = True if i == shipsNumber // 2 else False
+            if main:
+                color = GREEN
+            else:
+                color = RED
             if self.id == 1:
                 self.fleet.append(
-                    Ship(x, y, space, SHIP_VELOCITY, FACTION_1_SPACESHIP, PROJECTILES_1_MISSILE, i))
+                    Ship(x, y, space, SHIP_VELOCITY, FACTION_1_SPACESHIP, PROJECTILES_1_MISSILE, i, color))
             else:
                 self.fleet.append(
-                    Ship(x, y, space, SHIP_VELOCITY, FACTION_2_COMMANDER, PROJECTILES_2_MISSILE, i))
+                    Ship(x, y, space, SHIP_VELOCITY, FACTION_2_COMMANDER, PROJECTILES_2_MISSILE, i, color))
             self.threads.append(ShipThread(
                 i + 1, self.fleet[-1], self.q, main))
 

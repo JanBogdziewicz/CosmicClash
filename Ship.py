@@ -7,9 +7,9 @@ from Missile import Missile
 
 class Ship(Object):
 
-    def __init__(self, x, y, space, velocity, sprite, missile_sprite, id):
+    def __init__(self, x, y, space, velocity, sprite, missile_sprite, id, color):
         self.id = id
-        self.color = RED
+        self.color = color
         super().__init__(x, y, space, velocity, sprite)
         self.missile_sprite = missile_sprite
         self.missiles = []
