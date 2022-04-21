@@ -1,9 +1,11 @@
+import sys
 import pygame
 from config import *
 from Player import Player
 from Game import Game
 from network import Network
 import pickle
+
 
 def draw_window(player1):
     WIN.fill(WHITE)
@@ -17,6 +19,7 @@ def draw_window(player1):
 #     str = str.split(",")
 #     return [int(str[0]), int(str[1])]
 
+
 def main():
 
     # network part
@@ -27,7 +30,7 @@ def main():
     if player_id == 0:
         player1 = Player(PLAYER1_SPACE, 3, 1)
         player2 = Player(PLAYER2_SPACE, 3, 2)
-    
+
     if player_id == 1:
         player1 = Player(PLAYER2_SPACE, 3, 2)
         player2 = Player(PLAYER1_SPACE, 3, 1)
@@ -42,7 +45,7 @@ def main():
     run = True
     while run:
         clock.tick(FPS)
-        
+
         player_fleet_positions = []
 
         for ship in player1.fleet:
@@ -54,22 +57,19 @@ def main():
         for i in range(len(player2_fleet_positions)):
             player2.fleet[i].position = player2_fleet_positions[i]
 
-
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                pygame.quit()
-            if event.type == pygame.KEYDOWN:
-                for player in game.players:
-                    for thread in player.threads:
-                        thread.get_current_key(event.key)
-    
-
         if game.play == False:
             game.draw_menu()
         else:
             game.draw_window()
+
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                for player in game.players:
+                    for thread in player.threads:
+                        thread.get_current_key(event.key)
+            if event.type == pygame.QUIT:
+                run = False
+                pygame.quit()
 
 
 if __name__ == '__main__':

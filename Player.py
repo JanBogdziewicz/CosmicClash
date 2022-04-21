@@ -24,7 +24,8 @@ class Player(object):
             else:
                 self.fleet.append(
                     Ship(x, y, space, SHIP_VELOCITY, FACTION_2_COMMANDER, PROJECTILES_2_MISSILE, i))
-            self.threads.append(ShipThread(i + 1, self.fleet[-1], self.q, main))
+            self.threads.append(ShipThread(
+                i + 1, self.fleet[-1], self.q, main))
 
     def startGame(self):
         for i in range(len(self.threads)):

@@ -24,25 +24,24 @@ class Game(object):
         self.play = True
 
     def load_asteroids(self):
-        asteroids = []
-        asteroid1 = pygame.image.load(os.path.join(
-            'assets', 'asteroids', 'Asteroids', 'Mini', '08.png'))
-        asteroid2 = pygame.image.load(os.path.join(
-            'assets', 'asteroids', 'Asteroids', 'Mini', '07.png'))
-        asteroid3 = pygame.image.load(os.path.join(
-            'assets', 'asteroids', 'Asteroids', 'Mini', '06.png'))
-        asteroid4 = pygame.image.load(os.path.join(
-            'assets', 'asteroids', 'Asteroids', 'Mini', '05.png'))
-        asteroid5 = pygame.image.load(os.path.join(
-            'assets', 'asteroids', 'Asteroids', 'Mini', '01.png'))
-        asteroid6 = pygame.image.load(os.path.join(
-            'assets', 'asteroids', 'Asteroids', 'Mini', '02.png'))
-        asteroid7 = pygame.image.load(os.path.join(
-            'assets', 'asteroids', 'Asteroids', 'Mini', '03.png'))
-        asteroid8 = pygame.image.load(os.path.join(
-            'assets', 'asteroids', 'Asteroids', 'Mini', '04.png'))
-        asteroid9 = pygame.image.load(os.path.join(
-            'assets', 'asteroids', 'Asteroids', 'Mini', '09.png'))
+        asteroid1 = pygame.transform.scale(pygame.image.load(os.path.join(
+            'assets', 'asteroids', 'Asteroids', 'Mini', 'asteroidR1.png')), (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
+        asteroid2 = pygame.transform.scale(pygame.image.load(os.path.join(
+            'assets', 'asteroids', 'Asteroids', 'Mini', 'asteroidR2.png')), (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
+        asteroid3 = pygame.transform.scale(pygame.image.load(os.path.join(
+            'assets', 'asteroids', 'Asteroids', 'Mini', 'asteroidR3.png')), (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
+        asteroid4 = pygame.transform.scale(pygame.image.load(os.path.join(
+            'assets', 'asteroids', 'Asteroids', 'Mini', 'asteroidR4.png')), (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
+        asteroid5 = pygame.transform.scale(pygame.image.load(os.path.join(
+            'assets', 'asteroids', 'Asteroids', 'Mini', 'asteroidR5.png')), (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
+        asteroid6 = pygame.transform.scale(pygame.image.load(os.path.join(
+            'assets', 'asteroids', 'Asteroids', 'Mini', 'asteroidR6.png')), (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
+        asteroid7 = pygame.transform.scale(pygame.image.load(os.path.join(
+            'assets', 'asteroids', 'Asteroids', 'Mini', 'asteroidR7.png')), (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
+        asteroid8 = pygame.transform.scale(pygame.image.load(os.path.join(
+            'assets', 'asteroids', 'Asteroids', 'Mini', 'asteroidR8.png')), (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
+        asteroid9 = pygame.transform.scale(pygame.image.load(os.path.join(
+            'assets', 'asteroids', 'Asteroids', 'Mini', 'asteroidR9.png')), (OBSTACLE_WIDTH, OBSTACLE_HEIGHT))
 
         asteroid_images = [asteroid1, asteroid2, asteroid3,
                            asteroid4, asteroid5, asteroid6, asteroid7, asteroid8, asteroid9]
@@ -51,8 +50,9 @@ class Game(object):
 
     def obstacle_random_start_position(self):
         x = random.randrange(
-            SPACE_WIDTH*2, (WINDOW_WIDTH - 2*SPACE_WIDTH) - 10*OBSTACLE_WIDTH)
-        y = random.randrange(0, WINDOW_HEIGHT - 10*OBSTACLE_HEIGHT)
+            SPACE_WIDTH*2, (WINDOW_WIDTH - 2*SPACE_WIDTH) - OBSTACLE_WIDTH)
+        y = random.randrange(
+            OBSTACLE_HEIGHT, WINDOW_HEIGHT - 2*OBSTACLE_HEIGHT)
         return x, y
 
     def create_obstacles(self):
@@ -60,12 +60,13 @@ class Game(object):
         for i in range(ASTEROIDS_NUMBER):
             index = random.randrange(0, 7)
             x, y = self.obstacle_random_start_position()
-            obstacles.append(Asteroid(x, y, pygame.Rect(
-                x, y, OBSTACLE_WIDTH, OBSTACLE_HEIGHT), SHIP_VELOCITY, self.asteroid_list[index]))
+            obstacles.append(Asteroid(x, y, ASTEROID_SPACE,
+                             SHIP_VELOCITY, self.asteroid_list[index]))
         return obstacles
 
     def draw_obstacles(self):
         for obstacle in self.obstacles:
+            obstacle.randomMovement()
             WIN.blit(obstacle.sprite, obstacle.position)
 
     def draw_ships(self):
@@ -81,7 +82,8 @@ class Game(object):
         for player in self.players:
             for ship in player.fleet:
                 for missile in ship.missiles:
-                    WIN.blit(missile.sprite, (missile.position[X], missile.position[Y]))
+                    WIN.blit(missile.sprite,
+                             (missile.position[X], missile.position[Y]))
 
     def draw_health_bar(self, position, size, fill_level):
         pygame.draw.rect(WIN, BLACK, (*position, *size), 1)

@@ -1,4 +1,3 @@
-import pygame
 import random
 from config import *
 
@@ -18,7 +17,8 @@ class Object(object):
 
     def inSpace(self, x, y):
         return (x - MIN_DISTANCE >= self.space.x) and (x + MIN_DISTANCE <= (self.space.x + self.space.width)) and \
-               (y - MIN_DISTANCE >= self.space.y) and (y + MIN_DISTANCE <= (self.space.y + self.space.height))
+               (y - MIN_DISTANCE >= self.space.y) and (y +
+                                                       MIN_DISTANCE <= (self.space.y + self.space.height))
 
     def inWindow(self, x, y):
         return (x - MIN_DISTANCE >= 0) and (x + MIN_DISTANCE <= WINDOW_WIDTH) and (y - MIN_DISTANCE >= 0) and (y + MIN_DISTANCE <= WINDOW_HEIGHT)
