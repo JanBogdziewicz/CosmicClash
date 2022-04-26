@@ -16,41 +16,43 @@ except socket.error as e:
 s.listen(2)
 print("Waiting for a connection, Server Started")
 
-
-def read_pos(str):
-    str = str.split(",")
-    return int(str[0]), int(str[1])
-
-
-def make_pos(tup):
-    return str(tup[0]) + "," + str(tup[1])
-
-
-fleets = [ [], [] ]
+fleets = [None, None]
+missiles = [None, None]
 
 def threaded_client(conn, player):
     conn.send((str.encode(str(player))))
 
-    reply = ""
+    reply = [None, None]
     while True:
         try:
             data = conn.recv(2048)
-            fleets[player] = pickle.loads(data)
+            data_loaded = pickle.loads(data)
+            display_message = data_loaded.pop()
+            fleets[player] = data_loaded[0]
+            missiles[player] = data_loaded[1]
 
             if not data:
                 print("Disconnected")
                 break
             else:
                 if player == 1:
-                    reply = fleets[0]
+                    reply[0] = fleets[0]
+                    reply[1] = missiles[0]
                 else:
-                    reply = fleets[1]
+                    reply[0] = fleets[1]
+                    reply[1] = missiles[1]
 
-                print("Received: ", data)
-                print("Sending : ", reply)
-
+                if display_message:
+                    # print("Received: ", data)
+                    # print("Sending : ", reply)
+                    print(f"Player {player+1} positions: ", fleets[player])
+                
+                if missiles[player] is not None:
+                    print(f"Player {player+1} shot a bullet from a ship number {missiles[player]}")
+                
             msg = pickle.dumps(reply)
             conn.sendall(msg)
+
         except:
             break
 

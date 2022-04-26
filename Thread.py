@@ -10,7 +10,6 @@ THREAD_KEYS = {
     5: pygame.K_5
 }
 
-
 class ShipThread(threading.Thread):
     def __init__(self, threadID, ship, q, main=False):
         threading.Thread.__init__(self)
@@ -45,13 +44,14 @@ class ShipThread(threading.Thread):
                 self.ship.color = GREEN
                 self.current_key = None
 
+            if self.current_key == pygame.K_SPACE and self.main:
+                self.ship.shootMissile()
+                self.current_key = None
+
             if self.main:
                 self.ship.controlMovement(pygame.key.get_pressed())
-                self.ship.shootMissile(pygame.key.get_pressed())
+                
             else:
                 self.ship.randomMovement()
 
-            for missile in self.ship.missiles:
-                exist = missile.move()
-                if not exist:
-                    self.ship.missiles.remove(missile)
+            

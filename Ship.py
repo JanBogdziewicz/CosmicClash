@@ -14,6 +14,7 @@ class Ship(Object):
         self.missile_sprite = missile_sprite
         self.missiles = []
         self.missile_cooldown = False
+        self.missile_cooldown_count = 20
 
     def controlMovement(self, keys_pressed):
         # UP
@@ -42,9 +43,16 @@ class Ship(Object):
             self.changeDirection(
                 self.position[X] + v_x, self.position[Y] + v_y)
 
-    def shootMissile(self, keys_pressed):
-        if keys_pressed[pygame.K_SPACE] and not self.missile_cooldown:
+    def shootMissile(self):
+        if not self.missile_cooldown:
             missile = Missile(self.position[X] + SPACESHIP_WIDTH/2, self.position[Y] + (
                 (SPACESHIP_HEIGHT - 15)/2), self.space, MISSILE_VELOCITY, self.missile_sprite)
             self.missiles.append(missile)
             self.missile_cooldown = True
+            self.missile_cooldown_count = 20
+    
+    def decreaseCooldown(self):
+        self.missile_cooldown_count -= 1
+        if self.missile_cooldown_count == 0:
+            self.missile_cooldown = False
+            self.missile_cooldown_count = 20

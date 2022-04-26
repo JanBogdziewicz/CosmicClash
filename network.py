@@ -27,6 +27,6 @@ class Network:
 
     def send_only(self, data):
         try:
-            self.client.send(str.encode(data))
+            self.client.send(data)
         except socket.error as e:
             print(e)
