@@ -1,69 +1,79 @@
 import socket
-from _thread import *
-import sys
 import pickle
+from _thread import start_new_thread
+from player import *
+from game import *
+from thread import *
+from network import *
+from mapobjects import *
+from config import *
 
 server = "127.0.0.1"
 port = 5555
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+players = [Player(0), Player(1)]
+missiles = []
+asteroids = []
 
-try:
-    s.bind((server, port))
-except socket.error as e:
-    str(e)
 
-s.listen(2)
-print("Waiting for a connection, Server Started")
+def client_thread(connection_, player_id):
+    another_player_id = (player_id + 1) % 2
 
-fleets = [None, None]
-missiles = [None, None]
+    # send to the client player object
+    players[player_id] = Player(player_id)
+    connection_.send(pickle.dumps(players[player_id]))
 
-def threaded_client(conn, player):
-    conn.send((str.encode(str(player))))
-
-    reply = [None, None]
     while True:
         try:
-            data = conn.recv(2048)
-            data_loaded = pickle.loads(data)
-            display_message = data_loaded.pop()
-            fleets[player] = data_loaded[0]
-            missiles[player] = data_loaded[1]
+            # data retrieved from the client
+            data_retrieved = pickle.loads(connection_.recv(8192))
+            players[player_id], player_new_missiles = data_retrieved.unpack()
 
-            if not data:
-                print("Disconnected")
+            # checking if connection is active
+            if not data_retrieved:
+                print(f"Player {player_id} disconnected")
+                available_players.append(player_id)
                 break
-            else:
-                if player == 1:
-                    reply[0] = fleets[0]
-                    reply[1] = missiles[0]
-                else:
-                    reply[0] = fleets[1]
-                    reply[1] = missiles[1]
 
-                if display_message:
-                    # print("Received: ", data)
-                    # print("Sending : ", reply)
-                    print(f"Player {player+1} positions: ", fleets[player])
-                
-                if missiles[player] is not None:
-                    print(f"Player {player+1} shot a bullet from a ship number {missiles[player]}")
-                
-            msg = pickle.dumps(reply)
-            conn.sendall(msg)
+            # append fired missiles to the list of missiles
+            for i in range(len(player_new_missiles)):
+                missiles.append(player_new_missiles[i])
+
+            # sent data to the client
+            data_to_send = MessageFromServerToClient(players[another_player_id], missiles, asteroids)
+            connection_.sendall(pickle.dumps(data_to_send))
 
         except:
             break
 
-    print("Lost connection")
-    conn.close()
+    print(f"Lost connection with player {player_id}")
+    available_players.append(player_id)
+    connection_.close()
 
 
-currentPlayer = 0
-while True:
-    conn, addr = s.accept()
-    print("Connected to:", addr)
+if __name__ == '__main__':
+    soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    start_new_thread(threaded_client, (conn, currentPlayer))
-    currentPlayer += 1
+    number_of_asteroids = 10
+    asteroids = [Asteroid() for i in range(number_of_asteroids)]
+
+    max_number_of_clients = 2
+    available_players = [0, 1]
+
+    try:
+        soc.bind((server, port))
+    except socket.error as se:
+        str(se)
+
+    soc.listen(max_number_of_clients)
+    print("Waiting for a connection, Server Started")
+
+    while True:
+        connection, address = soc.accept()
+        available_players.sort()
+        current_player_id = available_players[0]
+        available_players.remove(current_player_id)
+
+        print(f"Player {current_player_id} connected to: {address}")
+
+        start_new_thread(client_thread, (connection, current_player_id))

@@ -1,85 +1,66 @@
 import pygame
-from network import Network
-
-width = 500
-height = 500
-win = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Client")
-
-clientNumber = 0
+from player import *
+from game import *
+from thread import *
+from network import *
+from mapobjects import *
+from config import *
 
 
-class Player():
-    def __init__(self, x, y, width, height, color):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
-        self.color = color
-        self.rect = (x, y, width, height)
-        self.vel = 3
+if __name__ == '__main__':
+    running_program = True
 
-    def draw(self, win):
-        pygame.draw.rect(win, self.color, self.rect)
+    # create connection between client and server
+    net = Network()
+    player1 = net.get_player()
+    player1_new_missiles = []
 
-    def move(self):
-        keys = pygame.key.get_pressed()
+    # create game
+    game = Game()
 
-        if keys[pygame.K_LEFT]:
-            self.x -= self.vel
+    # creating and starting threads for each ship
+    token = Queue(maxsize=1)
+    token.put(True)
+    ship_threads = []
+    for idx, ship in enumerate(player1.fleet):
+        ship_thread = ShipThread(idx + 1, ship, token)
+        ship_thread.start()
+        ship_threads.append(ship_thread)
 
-        if keys[pygame.K_RIGHT]:
-            self.x += self.vel
-
-        if keys[pygame.K_UP]:
-            self.y -= self.vel
-
-        if keys[pygame.K_DOWN]:
-            self.y += self.vel
-
-        self.update()
-
-    def update(self):
-        self.rect = (self.x, self.y, self.width, self.height)
-
-
-def read_pos(str):
-    str = str.split(",")
-    return int(str[0]), int(str[1])
-
-
-def make_pos(tup):
-    return str(tup[0]) + "," + str(tup[1])
-
-
-def redrawWindow(win,player, player2):
-    win.fill((255,255,255))
-    player.draw(win)
-    player2.draw(win)
-    pygame.display.update()
-
-
-def main():
-    run = True
-    n = Network()
-    startPos = read_pos(n.getPos())
-    p = Player(startPos[0],startPos[1],100,100,(0,255,0))
-    p2 = Player(0,0,100,100,(255,0,0))
     clock = pygame.time.Clock()
-
-    while run:
+    while running_program:
         clock.tick(60)
-        p2Pos = read_pos(n.send(make_pos((p.x, p.y))))
-        p2.x = p2Pos[0]
-        p2.y = p2Pos[1]
-        p2.update()
+
+        # send data to server
+        data_to_send = MessageFromClientToServer(player1, player1_new_missiles)
+        player1_new_missiles = []
+
+        # data retrieved from server
+        data_retrieved = net.send(data_to_send)
+        player2, missiles, asteroids = data_retrieved.unpack()
 
         for event in pygame.event.get():
+            # fire missile by commander ship
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                thread = find_main_thread(ship_threads)
+                if thread is not None:
+                    player1_new_missiles.append(thread.ship.shoot_missile())
+
+            # change commander ship
+            if event.type == pygame.KEYDOWN and event.key in list(THREAD_KEYS.values()):
+                thread_id = list(THREAD_KEYS.keys())[list(THREAD_KEYS.values()).index(event.key)]
+                thread = find_thread_by_id(ship_threads, thread_id)
+                if thread is not None:
+                    thread.change_thread()
+
+            # quit the game
             if event.type == pygame.QUIT:
-                run = False
+                running_program = False
                 pygame.quit()
 
-        p.move()
-        redrawWindow(win, p, p2)
+        # draw all objects present in the game
+        map_objects = player1.fleet + player2.fleet + missiles + asteroids
+        game.draw_window(map_objects)
 
-main()
+
+
