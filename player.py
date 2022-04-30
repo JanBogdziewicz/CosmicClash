@@ -19,8 +19,8 @@ class Player:
         fleet = []
         for ship_num in range(ships_number):
             x = self.space.x + self.space.width / 2
-            y = self.space.y + (ship_num + 0.5) * (self.space.height / ships_number)
+            y = self.space.y + (ship_num + 0.5) * \
+                (self.space.height / ships_number)
             ship = Ship(self.player_id, ship_num + 1, x, y, RED)
             fleet.append(ship)
         return fleet
-

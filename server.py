@@ -1,6 +1,8 @@
+from random import randrange
 import socket
 import pickle
 from _thread import start_new_thread
+import sys
 from player import *
 from game import *
 from thread import *
@@ -40,7 +42,8 @@ def client_thread(connection_, player_id):
                 missiles.append(player_new_missiles[i])
 
             # sent data to the client
-            data_to_send = MessageFromServerToClient(players[another_player_id], missiles, asteroids)
+            data_to_send = MessageFromServerToClient(
+                players[another_player_id], missiles, asteroids)
             connection_.sendall(pickle.dumps(data_to_send))
 
         except:
@@ -51,11 +54,22 @@ def client_thread(connection_, player_id):
     connection_.close()
 
 
+def server_thread():
+    clock = pygame.time.Clock()
+    while True:
+        clock.tick(60)
+        # move all map objects
+        for asteroid in asteroids:
+            asteroid.move()
+        for missile in missiles:
+            missile.move()
+
+
 if __name__ == '__main__':
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    number_of_asteroids = 10
-    asteroids = [Asteroid() for i in range(number_of_asteroids)]
+    number_of_asteroids = 15
+    asteroids = [Asteroid(randrange(9)) for i in range(number_of_asteroids)]
 
     max_number_of_clients = 2
     available_players = [0, 1]
@@ -68,6 +82,7 @@ if __name__ == '__main__':
     soc.listen(max_number_of_clients)
     print("Waiting for a connection, Server Started")
 
+    start_new_thread(server_thread, ())
     while True:
         connection, address = soc.accept()
         available_players.sort()

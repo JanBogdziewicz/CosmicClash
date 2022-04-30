@@ -23,7 +23,7 @@ class Game:
     def start_game(self):
         self.game_started = True
 
-    # dram game map
+    # draw game map
     def draw_game(self, map_objects):
         self.window.fill(WHITE)
         self.window.blit(BACKGROUND, (0, 0))
@@ -31,7 +31,7 @@ class Game:
             map_object.draw(self.window)
         pygame.display.update()
 
-    # dram menu before starting the game
+    # draw menu before starting the game
     def draw_menu(self):
         self.window.fill(WHITE)
         self.window.blit(BACKGROUND, (0, 0))
@@ -52,14 +52,17 @@ class Button:
         self.pressed = False
         self.elevation = 3
         self.dynamic_elevation = self.elevation
-        self.position = (WINDOW_WIDTH / 2 - BUTTON_WIDTH / 2, LOGO_HEIGHT + 100)
+        self.position = (WINDOW_WIDTH / 2 - BUTTON_WIDTH /
+                         2, LOGO_HEIGHT + 100)
         self.action = action
         self.window = window
 
-        self.top_rect = pygame.Rect(self.position, (BUTTON_WIDTH, BUTTON_HEIGHT))
+        self.top_rect = pygame.Rect(
+            self.position, (BUTTON_WIDTH, BUTTON_HEIGHT))
         self.top_color = '#475F77'
 
-        self.bottom_rect = pygame.Rect(self.position, (BUTTON_WIDTH, BUTTON_HEIGHT))
+        self.bottom_rect = pygame.Rect(
+            self.position, (BUTTON_WIDTH, BUTTON_HEIGHT))
         self.bottom_color = '#354B5E'
 
         self.text_surf = FONT.render("Start", True, WHITE)
@@ -72,8 +75,10 @@ class Button:
         self.bottom_rect.midtop = self.top_rect.midtop
         self.bottom_rect.height = self.top_rect.height + self.dynamic_elevation
 
-        pygame.draw.rect(self.window, self.bottom_color, self.bottom_rect, border_radius=12)
-        pygame.draw.rect(self.window, self.top_color, self.top_rect, border_radius=12)
+        pygame.draw.rect(self.window, self.bottom_color,
+                         self.bottom_rect, border_radius=12)
+        pygame.draw.rect(self.window, self.top_color,
+                         self.top_rect, border_radius=12)
         self.window.blit(self.text_surf, self.text_rect)
         self.check_click()
 
