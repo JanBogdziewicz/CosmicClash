@@ -49,6 +49,17 @@ class MapObject:
     def draw(self):
         raise NotImplementedError("Please Implement this method")
 
+    # check whether this and given object collide
+    def collides_with(self, other_obj):
+        object_center = pygame.Vector2(
+            (self.x + self.width/2, self.y + self.height/2))
+        object_radius = self.width / 2
+        oth_object_center = pygame.Vector2(
+            (other_obj.x + other_obj.width/2, other_obj.y + other_obj.height/2))
+        oth_object_radius = other_obj.width / 2
+        distance = object_center.distance_to(oth_object_center)
+        return distance < object_radius + oth_object_radius
+
 
 class Asteroid(MapObject):
     def __init__(self, image_id):
@@ -59,7 +70,7 @@ class Asteroid(MapObject):
                            WINDOW_HEIGHT - MIN_DISTANCE - 40)
         # asteroid can move everywhere in the window space
         space = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-        super().__init__(x, y, 40, 40, 20, space, 1)
+        super().__init__(x, y, 40, 40, 100, space, 1)
         self.image_id = image_id
 
     # asteroid moves in random direction
@@ -118,7 +129,7 @@ class Ship(MapObject):
     def shoot_missile(self):
         # if player is on the left side of the window, create missile on the right side of the ship and conversely
         x = self.x + self.width / 2 if self.player_id == 0 else self.x - self.width / 2
-        return Missile(self.player_id, x, self.y)
+        return Missile(self.player_id, x, self.y + self.height / 2 - MIN_DISTANCE / 2)
 
     def draw_id(self, window, hb_position):
         id_text = FONT_ID.render(str(self.ship_id), False, self.color)

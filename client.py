@@ -39,6 +39,13 @@ if __name__ == '__main__':
         data_retrieved = net.send(data_to_send)
         player2, missiles, asteroids = data_retrieved.unpack()
 
+        # check for asteroid collision with ships
+        for asteroid in asteroids:
+            for player in [player1, player2]:
+                for ship in player.fleet:
+                    if asteroid.collides_with(ship):
+                        ship.hp -= 20
+
         for event in pygame.event.get():
             # fire missile by commander ship
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -48,7 +55,8 @@ if __name__ == '__main__':
 
             # change commander ship
             if event.type == pygame.KEYDOWN and event.key in list(THREAD_KEYS.values()):
-                thread_id = list(THREAD_KEYS.keys())[list(THREAD_KEYS.values()).index(event.key)]
+                thread_id = list(THREAD_KEYS.keys())[list(
+                    THREAD_KEYS.values()).index(event.key)]
                 thread = find_thread_by_id(ship_threads, thread_id)
                 if thread is not None:
                     thread.change_thread()
@@ -61,6 +69,3 @@ if __name__ == '__main__':
         # draw all objects present in the game
         map_objects = player1.fleet + player2.fleet + missiles + asteroids
         game.draw_window(map_objects)
-
-
-

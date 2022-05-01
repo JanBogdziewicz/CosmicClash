@@ -58,9 +58,28 @@ def server_thread():
     clock = pygame.time.Clock()
     while True:
         clock.tick(60)
-        # move all map objects
-        for asteroid in asteroids:
+        # move asteroids
+        for asteroid_id in range(len(asteroids)):
+            asteroid = asteroids[asteroid_id]
+            # check for collisions with other asteroids
+            for other_asteroid_id in range(asteroid_id + 1, len(asteroids)):
+                other_asteroid = asteroids[other_asteroid_id]
+                if asteroid.collides_with(other_asteroid):
+                    asteroid.change_direction_of_movement()
+                    other_asteroid.change_direction_of_movement()
+                    asteroid.hp -= 2
+                    other_asteroid.hp -= 2
+            # check for collisions with ships
+            for player in players:
+                for ship in player.fleet:
+                    if asteroid.collides_with(ship):
+                        asteroid.hp = 0
             asteroid.move()
+        # remove destoryed asteroids
+        for asteroid in asteroids:
+            if asteroid.hp <= 0:
+                asteroids.remove(asteroid)
+        # move missiles
         for missile in missiles:
             missile.move()
 
@@ -82,7 +101,6 @@ if __name__ == '__main__':
     soc.listen(max_number_of_clients)
     print("Waiting for a connection, Server Started")
 
-    start_new_thread(server_thread, ())
     while True:
         connection, address = soc.accept()
         available_players.sort()
@@ -92,3 +110,5 @@ if __name__ == '__main__':
         print(f"Player {current_player_id} connected to: {address}")
 
         start_new_thread(client_thread, (connection, current_player_id))
+        if len(available_players) == 1:
+            start_new_thread(server_thread, ())
