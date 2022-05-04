@@ -112,6 +112,7 @@ class Ship(MapObject):
         self.player_id = player_id
         self.color = color
         self.max_hp = 100
+        self.move = True
 
     def control_movement(self, keys_pressed):
         if keys_pressed[pygame.K_UP] and self.position_in_space(self.x, self.y - self.velocity):

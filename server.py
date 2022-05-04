@@ -75,7 +75,7 @@ def server_thread():
                     if asteroid.collides_with(ship):
                         asteroid.hp = 0
             asteroid.move()
-        # remove destoryed asteroids
+        # remove destroyed asteroids
         for asteroid in asteroids:
             if asteroid.hp <= 0:
                 asteroids.remove(asteroid)

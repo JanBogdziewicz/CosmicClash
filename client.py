@@ -30,6 +30,8 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     while running_program:
         clock.tick(60)
+        # finding main thread
+        thread = find_main_thread(ship_threads)
 
         # send data to server
         data_to_send = MessageFromClientToServer(player1, player1_new_missiles)
@@ -39,17 +41,27 @@ if __name__ == '__main__':
         data_retrieved = net.send(data_to_send)
         player2, missiles, asteroids = data_retrieved.unpack()
 
-        # check for asteroid collision with ships
-        for asteroid in asteroids:
-            for player in [player1, player2]:
-                for ship in player.fleet:
-                    if asteroid.collides_with(ship):
+        # check for ships collision
+        for player in [player1, player2]:
+            for ship_id in range(len(player.fleet)):
+                ship = player.fleet[ship_id]
+                # check for collision with other ships
+                for other_ship_id in range(ship_id + 1, len(player.fleet)):
+                    other_ship = player.fleet[other_ship_id]
+                    if ship.collides_with(other_ship):
+                        ship.change_direction_of_movement()
+                        other_ship.change_direction_of_movement()
+                        if thread:
+                            if ship == thread.ship:
+                                ship.move = False
+                # check for collisions with asteroids
+                for asteroid in asteroids:
+                    if ship.collides_with(asteroid):
                         ship.hp -= 20
 
         for event in pygame.event.get():
             # fire missile by commander ship
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                thread = find_main_thread(ship_threads)
                 if thread is not None:
                     player1_new_missiles.append(thread.ship.shoot_missile())
 
