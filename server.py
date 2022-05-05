@@ -74,14 +74,35 @@ def server_thread():
                 for ship in player.fleet:
                     if asteroid.collides_with(ship):
                         asteroid.hp = 0
+            #check for collisions with missiles
+            for missile in missiles:
+                if asteroid.collides_with(missile):
+                    missile.hp = 0
+                    asteroid.hp -= 20
             asteroid.move()
         # remove destroyed asteroids
         for asteroid in asteroids:
             if asteroid.hp <= 0:
                 asteroids.remove(asteroid)
         # move missiles
-        for missile in missiles:
+        for missile_id in range(len(missiles)):
+            missile = missiles[missile_id]
+            #check for collisions with players
+            for player in players:
+                for ship in player.fleet:
+                    if missile.collides_with(ship):
+                        missile.hp = 0
+            #check for collisions with other missiles
+            for other_missile_id in range(missile_id+1, len(missiles)):
+                other_missile = missiles[other_missile_id]
+                if missile.collides_with(other_missile):
+                    missile.hp = 0
+                    other_missile.hp = 0
             missile.move()
+        # remove destroyed missiles
+        for missile in missiles:
+            if missile.hp <= 0:
+                missiles.remove(missile)
 
 
 if __name__ == '__main__':

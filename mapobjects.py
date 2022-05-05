@@ -95,6 +95,15 @@ class Missile(MapObject):
         else:
             self.x -= self.velocity
 
+    # overriding collision so that missiles don't 
+    # collide with ones from the same player nor 
+    # with the ship that shot the missile
+    def collides_with(self, other_obj):
+        if isinstance(other_obj, Missile) or isinstance(other_obj, Ship):
+            return self.player_id != other_obj.player_id and super().collides_with(other_obj)
+        else:
+            return super().collides_with(other_obj)
+
     def draw(self, window):
         if self.player_id == 0:
             window.blit(PLAYER_1_MISSILE, (self.x, self.y))

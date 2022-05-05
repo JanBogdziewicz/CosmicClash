@@ -58,6 +58,11 @@ if __name__ == '__main__':
                 for asteroid in asteroids:
                     if ship.collides_with(asteroid):
                         ship.hp -= 20
+                # check for collisions with missiles
+                for missile in missiles:
+                    if ship.collides_with(missile) and missile.player_id != player.player_id:
+                        ship.hp -= 20
+
 
         for event in pygame.event.get():
             # fire missile by commander ship
