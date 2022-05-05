@@ -1,3 +1,4 @@
+import copy
 import pygame
 import random
 import math
@@ -18,6 +19,7 @@ class MapObject:
         self.space = space
         self.velocity = velocity
         self.movement_direction_angle = random.randint(0, 360)
+        self.movement = True
 
     # object movement in random direction
     def random_movement(self):
@@ -36,6 +38,15 @@ class MapObject:
                (y - MIN_DISTANCE >= self.space.y) and \
                (y + self.height + MIN_DISTANCE <=
                 (self.space.y + self.space.height))
+
+    # return the same object with position after next move
+    def next_move(self):
+        result = copy.copy(self)
+        velocity_x = math.cos(self.movement_direction_angle) * self.velocity
+        velocity_y = math.sin(self.movement_direction_angle) * self.velocity
+        result.x += velocity_x
+        result.y += velocity_y
+        return result
 
     # change direction of random movement of the object
     def change_direction_of_movement(self):
@@ -95,8 +106,8 @@ class Missile(MapObject):
         else:
             self.x -= self.velocity
 
-    # overriding collision so that missiles don't 
-    # collide with ones from the same player nor 
+    # overriding collision so that missiles don't
+    # collide with ones from the same player nor
     # with the ship that shot the missile
     def collides_with(self, other_obj):
         if isinstance(other_obj, Missile) or isinstance(other_obj, Ship):
@@ -121,7 +132,6 @@ class Ship(MapObject):
         self.player_id = player_id
         self.color = color
         self.max_hp = 100
-        self.move = True
 
     def control_movement(self, keys_pressed):
         if keys_pressed[pygame.K_UP] and self.position_in_space(self.x, self.y - self.velocity):

@@ -67,19 +67,23 @@ def server_thread():
                 if asteroid.collides_with(other_asteroid):
                     asteroid.change_direction_of_movement()
                     other_asteroid.change_direction_of_movement()
-                    asteroid.hp -= 2
-                    other_asteroid.hp -= 2
+                    if asteroid.next_move().collides_with(other_asteroid.next_move()):
+                        asteroid.movement = False
+                        other_asteroid.movement = False
             # check for collisions with ships
             for player in players:
                 for ship in player.fleet:
                     if asteroid.collides_with(ship):
                         asteroid.hp = 0
-            #check for collisions with missiles
+            # check for collisions with missiles
             for missile in missiles:
                 if asteroid.collides_with(missile):
                     missile.hp = 0
                     asteroid.hp -= 20
-            asteroid.move()
+            if asteroid.movement:
+                asteroid.move()
+            else:
+                asteroid.movement = True
         # remove destroyed asteroids
         for asteroid in asteroids:
             if asteroid.hp <= 0:
@@ -87,12 +91,12 @@ def server_thread():
         # move missiles
         for missile_id in range(len(missiles)):
             missile = missiles[missile_id]
-            #check for collisions with players
+            # check for collisions with players
             for player in players:
                 for ship in player.fleet:
                     if missile.collides_with(ship):
                         missile.hp = 0
-            #check for collisions with other missiles
+            # check for collisions with other missiles
             for other_missile_id in range(missile_id+1, len(missiles)):
                 other_missile = missiles[other_missile_id]
                 if missile.collides_with(other_missile):
@@ -110,6 +114,19 @@ if __name__ == '__main__':
 
     number_of_asteroids = 15
     asteroids = [Asteroid(randrange(9)) for i in range(number_of_asteroids)]
+
+    # changing position of colliding asteroids
+    for asteroid_id in range(len(asteroids)):
+        asteroid = asteroids[asteroid_id]
+        for other_asteroid_id in range(asteroid_id + 1, len(asteroids)):
+            other_asteroid = asteroids[other_asteroid_id]
+            while asteroid.collides_with(other_asteroid):
+                x = random.randint(PLAYER_SPACE_WIDTH + MIN_DISTANCE + 40,
+                                   WINDOW_WIDTH - PLAYER_SPACE_WIDTH - MIN_DISTANCE - 40)
+                y = random.randint(MIN_DISTANCE + 40,
+                                   WINDOW_HEIGHT - MIN_DISTANCE - 40)
+                asteroid.x = x
+                asteroid.y = y
 
     max_number_of_clients = 2
     available_players = [0, 1]

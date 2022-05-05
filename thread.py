@@ -56,9 +56,12 @@ class ShipThread(threading.Thread):
             clock.tick(60)
 
             if self.main:
-                if self.ship.move:
+                if self.ship.movement:
                     self.ship.control_movement(pygame.key.get_pressed())
                 else:
-                    self.ship.move = True
+                    self.ship.movement = True
             else:
-                self.ship.random_movement()
+                if self.ship.movement:
+                    self.ship.random_movement()
+                else:
+                    self.ship.movement = True
