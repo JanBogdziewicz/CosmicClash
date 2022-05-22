@@ -31,6 +31,17 @@ class MapObject:
         else:
             self.change_direction_of_movement()
 
+    # object movement to target position
+    def target_movement(self, target):
+        x = target[0] - self.x
+        y = target[1] - self.y
+        z = (x ** 2 + y ** 2) ** 0.5 + 0.0000001
+        velocity_x = x / z * self.velocity
+        velocity_y = y / z * self.velocity
+        if self.position_in_space(self.x + velocity_x, self.y + velocity_y) and z > 5:
+            self.x += velocity_x
+            self.y += velocity_y
+
     # checking if the given coordinates are inside the space where object can move
     def position_in_space(self, x, y):
         return (x - MIN_DISTANCE >= self.space.x) and \

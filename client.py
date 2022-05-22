@@ -1,4 +1,5 @@
 import pygame
+import math
 from player import *
 from game import *
 from thread import *
@@ -23,9 +24,14 @@ if __name__ == '__main__':
     token.put(True)
     ship_threads = []
     for idx, ship in enumerate(player1.fleet):
-        ship_thread = ShipThread(idx + 1, ship, token)
+        ship_thread = ShipThread(player1.player_id, idx + 1, ship, token)
         ship_thread.start()
         ship_threads.append(ship_thread)
+
+    for ship_thread in ship_threads:
+        ship_thread.ship_threads = ship_threads
+
+    ships_in_formation = False
 
     clock = pygame.time.Clock()
     while running_program:
@@ -80,10 +86,50 @@ if __name__ == '__main__':
                 if thread is not None:
                     thread.change_thread()
 
+            # set or release the formation
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                ship_positions = []
+                if not ships_in_formation:
+                    if thread is not None:
+                        main_ship_position = thread.ship.get_position()
+                        for ship_thread in ship_threads:
+                            if ship_thread.thread_id != thread.thread_id:
+                                ship_position = ship_thread.ship.get_position()
+                                vertical_distance = ship_position[1] - main_ship_position[1]
+                                ship_positions.append((ship_thread, vertical_distance))
+
+                        ship_positions.sort(key=lambda x: x[1])
+
+                        for idx, (ship_thread, distance) in enumerate(ship_positions):
+                            if idx < math.ceil(len(ship_positions) // 2):
+                                position = idx - (len(ship_positions) % 2) - (len(ship_positions) // 2)
+                            else:
+                                position = idx + 1 - (len(ship_positions) // 2)
+
+                            ship_thread.set_formation(position, main_ship_position)
+
+                        thread.set_formation(0, main_ship_position)
+                        ships_in_formation = True
+
+                else:
+                    for ship_thread in ship_threads:
+                        ship_thread.release_formation()
+
+                    ships_in_formation = False
+
             # quit the game
             if event.type == pygame.QUIT:
                 running_program = False
                 pygame.quit()
+
+        # send position of the leader to other ships in the formation
+        if ships_in_formation:
+            formation_leader = find_formation_leader(ship_threads)
+
+            if formation_leader is not None:
+                leader_position = formation_leader.get_position()
+                for ship_thread in ship_threads:
+                    ship_thread.set_formation_leader_position(leader_position)
 
         # draw all objects present in the game
         map_objects = player1.fleet + player2.fleet + missiles + asteroids
