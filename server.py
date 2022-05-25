@@ -17,6 +17,21 @@ players = [Player(0), Player(1)]
 missiles = []
 asteroids = []
 
+# adding new asteroids if one of the existing ones is destroyed
+
+
+def add_new_asteroid():
+    new_asteroid = Asteroid(randrange(9), True)
+    new_asteroid.x = random.randint(2*PLAYER_SPACE_WIDTH,
+                                    WINDOW_WIDTH - 2*PLAYER_SPACE_WIDTH)
+    new_asteroid.y = random.choice([- MIN_DISTANCE - 40,
+                                    WINDOW_HEIGHT + MIN_DISTANCE + 40])
+    if new_asteroid.y < 0:
+        new_asteroid.movement_direction_angle = 90
+    else:
+        new_asteroid.movement_direction_angle = 225
+    asteroids.append(new_asteroid)
+
 
 def client_thread(connection_, player_id):
     another_player_id = (player_id + 1) % 2
@@ -64,7 +79,13 @@ def server_thread():
             # check for collisions with other asteroids
             for other_asteroid_id in range(asteroid_id + 1, len(asteroids)):
                 other_asteroid = asteroids[other_asteroid_id]
-                if asteroid.collides_with(other_asteroid):
+                if asteroid.collides_with(other_asteroid) and (asteroid.out_of_map or other_asteroid.out_of_map):
+                    if asteroid.out_of_map:
+                        asteroids.remove(asteroid)
+                    else:
+                        asteroids.remove(other_asteroid)
+                    add_new_asteroid()
+                elif asteroid.collides_with(other_asteroid):
                     asteroid.change_direction_of_movement()
                     other_asteroid.change_direction_of_movement()
                     if asteroid.next_move().collides_with(other_asteroid.next_move()):
@@ -84,10 +105,12 @@ def server_thread():
                 asteroid.move()
             else:
                 asteroid.movement = True
-        # remove destroyed asteroids
+        # remove destroyed asteroids and a new one instead of destroyed one
         for asteroid in asteroids:
             if asteroid.hp <= 0:
                 asteroids.remove(asteroid)
+                add_new_asteroid()
+
         # move missiles
         for missile_id in range(len(missiles)):
             missile = missiles[missile_id]
@@ -103,9 +126,13 @@ def server_thread():
                     missile.hp = 0
                     other_missile.hp = 0
             missile.move()
-        # remove destroyed missiles
+        # remove destroyed and out of map missiles
         for missile in missiles:
-            if missile.hp <= 0:
+            if missile.player_id == 0:
+                x = missile.x - MIN_DISTANCE
+            else:
+                x = missile.x + MIN_DISTANCE
+            if missile.hp <= 0 or not missile.position_in_space(x, missile.y):
                 missiles.remove(missile)
 
 
@@ -113,20 +140,22 @@ if __name__ == '__main__':
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     number_of_asteroids = 15
-    asteroids = [Asteroid(randrange(9)) for i in range(number_of_asteroids)]
+    asteroids = [Asteroid(randrange(9), False)
+                 for i in range(number_of_asteroids)]
 
     # changing position of colliding asteroids
     for asteroid_id in range(len(asteroids)):
         asteroid = asteroids[asteroid_id]
-        for other_asteroid_id in range(asteroid_id + 1, len(asteroids)):
-            other_asteroid = asteroids[other_asteroid_id]
-            while asteroid.collides_with(other_asteroid):
-                x = random.randint(PLAYER_SPACE_WIDTH + MIN_DISTANCE + 40,
-                                   WINDOW_WIDTH - PLAYER_SPACE_WIDTH - MIN_DISTANCE - 40)
-                y = random.randint(MIN_DISTANCE + 40,
-                                   WINDOW_HEIGHT - MIN_DISTANCE - 40)
-                asteroid.x = x
-                asteroid.y = y
+        for other_asteroid_id in range(asteroid_id, len(asteroids)):
+            if asteroid_id != other_asteroid_id:
+                other_asteroid = asteroids[other_asteroid_id]
+                while asteroid.collides_with(other_asteroid):
+                    x = random.randint(PLAYER_SPACE_WIDTH + MIN_DISTANCE + 40,
+                                       WINDOW_WIDTH - PLAYER_SPACE_WIDTH - MIN_DISTANCE - 40)
+                    y = random.randint(MIN_DISTANCE + 40,
+                                       WINDOW_HEIGHT - MIN_DISTANCE - 40)
+                    asteroid.x = x
+                    asteroid.y = y
 
     max_number_of_clients = 2
     available_players = [0, 1]

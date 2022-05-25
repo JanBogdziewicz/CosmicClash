@@ -20,12 +20,15 @@ class MapObject:
         self.velocity = velocity
         self.movement_direction_angle = random.randint(0, 360)
         self.movement = True
+        self.out_of_map = False  # flag for adding new asteroids
 
     # object movement in random direction
     def random_movement(self):
         velocity_x = math.cos(self.movement_direction_angle) * self.velocity
         velocity_y = math.sin(self.movement_direction_angle) * self.velocity
-        if self.position_in_space(self.x + velocity_x, self.y + velocity_y):
+        if self.position_in_space(self.x + velocity_x, self.y + velocity_y) or self.out_of_map:
+            if self.position_in_space(self.x + velocity_x, self.y + velocity_y) and self.out_of_map:
+                self.out_of_map = False
             self.x += velocity_x
             self.y += velocity_y
         else:
@@ -84,7 +87,7 @@ class MapObject:
 
 
 class Asteroid(MapObject):
-    def __init__(self, image_id):
+    def __init__(self, image_id, out_of_map):
         # initial position of the asteroid is between players spaces
         x = random.randint(PLAYER_SPACE_WIDTH + MIN_DISTANCE + 40,
                            WINDOW_WIDTH - PLAYER_SPACE_WIDTH - MIN_DISTANCE - 40)
@@ -94,6 +97,7 @@ class Asteroid(MapObject):
         space = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
         super().__init__(x, y, 40, 40, 100, space, 1)
         self.image_id = image_id
+        self.out_of_map = out_of_map
 
     # asteroid moves in random direction
     def move(self):

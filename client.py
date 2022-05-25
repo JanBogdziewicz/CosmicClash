@@ -95,18 +95,23 @@ if __name__ == '__main__':
                         for ship_thread in ship_threads:
                             if ship_thread.thread_id != thread.thread_id:
                                 ship_position = ship_thread.ship.get_position()
-                                vertical_distance = ship_position[1] - main_ship_position[1]
-                                ship_positions.append((ship_thread, vertical_distance))
+                                vertical_distance = ship_position[1] - \
+                                    main_ship_position[1]
+                                ship_positions.append(
+                                    (ship_thread, vertical_distance))
 
                         ship_positions.sort(key=lambda x: x[1])
 
                         for idx, (ship_thread, distance) in enumerate(ship_positions):
                             if idx < math.ceil(len(ship_positions) // 2):
-                                position = idx - (len(ship_positions) % 2) - (len(ship_positions) // 2)
+                                position = idx - \
+                                    (len(ship_positions) % 2) - \
+                                    (len(ship_positions) // 2)
                             else:
                                 position = idx + 1 - (len(ship_positions) // 2)
 
-                            ship_thread.set_formation(position, main_ship_position)
+                            ship_thread.set_formation(
+                                position, main_ship_position)
 
                         thread.set_formation(0, main_ship_position)
                         ships_in_formation = True
