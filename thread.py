@@ -54,13 +54,22 @@ class ShipThread(threading.Thread):
         self.position_in_formation = 0
 
     # change main flag
-    def change_thread(self):
+    # if thread was main remove the token and add it to the pool
+    # if thread wan't main get token from pool or current main
+    def change_thread(self, ship_threads):
         if self.main:
             self.token.put(True)
             self.ship.color = RED
             self.main = False
+        elif self.token.empty():
+            main_thread = find_main_thread(ship_threads)
+            main_thread.token.put(True)
+            main_thread.ship.color = RED
+            main_thread.main = False
 
-        elif not self.token.empty():
+            self.main = self.token.get()
+            self.ship.color = GREEN
+        else:
             self.main = self.token.get()
             self.ship.color = GREEN
 

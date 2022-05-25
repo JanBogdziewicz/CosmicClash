@@ -90,7 +90,11 @@ if __name__ == '__main__':
                     THREAD_KEYS.values()).index(event.key)]
                 thread = find_thread_by_id(ship_threads, thread_id)
                 if thread is not None:
-                    thread.change_thread()
+                    thread.change_thread(ship_threads)
+                    if ships_in_formation:
+                        for ship_thread in ship_threads:
+                            ship_thread.release_formation()
+                        ships_in_formation = False
 
             # set or release the formation
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
