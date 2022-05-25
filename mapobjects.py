@@ -147,6 +147,8 @@ class Ship(MapObject):
         self.player_id = player_id
         self.color = color
         self.max_hp = 100
+        self.ammo = PLAYER_AMMO
+        self.reload_cooldown = AMMO_RELOAD_TIME
 
     def control_movement(self, keys_pressed):
         if keys_pressed[pygame.K_UP] and self.position_in_space(self.x, self.y - self.velocity):
@@ -164,6 +166,8 @@ class Ship(MapObject):
     def shoot_missile(self):
         # if player is on the left side of the window, create missile on the right side of the ship and conversely
         x = self.x + self.width / 2 if self.player_id == 0 else self.x - self.width / 2
+        # remove one ammo from ship magazine
+        self.ammo -= 1
         return Missile(self.player_id, x, self.y + self.height / 2 - MIN_DISTANCE / 2)
 
     def draw_id(self, window, hb_position):

@@ -71,11 +71,17 @@ if __name__ == '__main__':
                 for missile in missiles:
                     if ship.collides_with(missile) and missile.player_id != player.player_id:
                         ship.hp -= 20
+                # reload if not on cooldown and if not at full ammo
+                if not ship.reload_cooldown and ship.ammo < PLAYER_AMMO:
+                    ship.reload_cooldown = AMMO_RELOAD_TIME
+                    ship.ammo += 1
+                elif ship.ammo < PLAYER_AMMO:
+                    ship.reload_cooldown -= 1
 
         for event in pygame.event.get():
             # fire missile by commander ship
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                if thread is not None:
+                if thread is not None and thread.ship.ammo > 0:
                     player1_new_missiles.append(thread.ship.shoot_missile())
 
             # change commander ship
