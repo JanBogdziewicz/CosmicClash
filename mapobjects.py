@@ -31,7 +31,8 @@ class MapObject:
         velocity_y = math.cos(math.radians(
             self.movement_direction_angle)) * self.velocity
 
-        in_space, orientation = self.position_in_space(self.x + velocity_x, self.y + velocity_y)
+        in_space, orientation = self.position_in_space(
+            self.x + velocity_x, self.y + velocity_y)
 
         if in_space or self.out_of_map:
             if in_space and self.out_of_map:
@@ -43,7 +44,7 @@ class MapObject:
                 self.change_direction_of_movement(0)
             else:
                 self.change_direction_of_movement(90)
-            
+
     # object movement to target position
     def target_movement(self, target):
         x = target[0] - self.x
@@ -51,7 +52,9 @@ class MapObject:
         z = (x ** 2 + y ** 2) ** 0.5 + 0.0000001
         velocity_x = x / z * self.velocity
         velocity_y = y / z * self.velocity
-        if self.position_in_space(self.x + velocity_x, self.y + velocity_y) and z > 5:
+        in_space, orientation = self.position_in_space(
+            self.x + velocity_x, self.y + velocity_y)
+        if in_space and z > 5:
             self.x += velocity_x
             self.y += velocity_y
 
@@ -71,7 +74,7 @@ class MapObject:
         elif not (y + self.height + MIN_DISTANCE <= (self.space.y + self.space.height)):
             message = "bottom"
             in_space = False
-        
+
         return in_space, message
 
         return (x - MIN_DISTANCE >= self.space.x) and \
@@ -97,9 +100,8 @@ class MapObject:
 
         if collider == 0 or collider == 90:
             self.movement_direction_angle = angle_tools.calculate_bounce_angle(
-            self.movement_direction_angle, collider)
+                self.movement_direction_angle, collider)
             return
-
 
         quadrant = None
         x, y = self.get_position()
@@ -199,7 +201,7 @@ class Missile(MapObject):
     def __init__(self, player_id, x, y):
         # missile can move everywhere in the window space
         space = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-        super().__init__(x, y, 20, 16, 5, space, 10)
+        super().__init__(x, y, 20, 16, 5, space, 5)
         self.player_id = player_id
 
     # missile moves horizontally in proper direction
@@ -239,17 +241,29 @@ class Ship(MapObject):
         self.reload_cooldown = AMMO_RELOAD_TIME
 
     def control_movement(self, keys_pressed):
-        if keys_pressed[pygame.K_UP] and self.position_in_space(self.x, self.y - self.velocity):
-            self.y -= self.velocity
+        if keys_pressed[pygame.K_UP]:
+            in_space, orientation = self.position_in_space(
+                self.x, self.y - self.velocity)
+            if in_space:
+                self.y -= self.velocity
 
-        if keys_pressed[pygame.K_DOWN] and self.position_in_space(self.x, self.y + self.velocity):
-            self.y += self.velocity
+        if keys_pressed[pygame.K_DOWN]:
+            in_space, orientation = self.position_in_space(
+                self.x, self.y + self.velocity)
+            if in_space:
+                self.y += self.velocity
 
-        if keys_pressed[pygame.K_LEFT] and self.position_in_space(self.x - self.velocity, self.y):
-            self.x -= self.velocity
+        if keys_pressed[pygame.K_LEFT]:
+            in_space, orientation = self.position_in_space(
+                self.x - self.velocity, self.y)
+            if in_space:
+                self.x -= self.velocity
 
-        if keys_pressed[pygame.K_RIGHT] and self.position_in_space(self.x + self.velocity, self.y):
-            self.x += self.velocity
+        if keys_pressed[pygame.K_RIGHT]:
+            in_space, orientation = self.position_in_space(
+                self.x + self.velocity, self.y)
+            if in_space:
+                self.x += self.velocity
 
     def shoot_missile(self):
         # if player is on the left side of the window, create missile on the right side of the ship and conversely

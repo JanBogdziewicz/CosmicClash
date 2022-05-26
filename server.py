@@ -28,9 +28,9 @@ def add_new_asteroid():
     new_asteroid.y = random.choice([- MIN_DISTANCE - 40,
                                     WINDOW_HEIGHT + MIN_DISTANCE + 40])
     if new_asteroid.y < 0:
-        new_asteroid.movement_direction_angle = 90
+        new_asteroid.movement_direction_angle = 0
     else:
-        new_asteroid.movement_direction_angle = 225
+        new_asteroid.movement_direction_angle = 180
     asteroids.append(new_asteroid)
 
 
