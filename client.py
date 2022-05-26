@@ -56,11 +56,7 @@ if __name__ == '__main__':
                 for other_ship_id in range(ship_id + 1, len(player.fleet)):
                     other_ship = player.fleet[other_ship_id]
                     if ship.collides_with(other_ship):
-                        ship.change_direction_of_movement()
-                        other_ship.change_direction_of_movement()
-                        if ship.next_move().collides_with(other_ship.next_move()):
-                            ship.movement = False
-                            other_ship.movement = False
+                        ship.change_direction_of_movement(other_ship)
                         if thread:
                             if ship == thread.ship:
                                 ship.movement = False

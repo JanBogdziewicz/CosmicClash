@@ -3,13 +3,13 @@ import os
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1200, 700
 
+ICON_IMAGE_PATH = os.path.join("images/game", "icon.gif")
+ICON = pygame.image.load(ICON_IMAGE_PATH)
+
 LOGO_WIDTH, LOGO_HEIGHT = 360, 250
 LOGO_IMAGE_PATH = os.path.join("images/game", "logo.png")
 LOGO = pygame.transform.scale(pygame.image.load(
     LOGO_IMAGE_PATH), (LOGO_WIDTH, LOGO_HEIGHT))
-
-ICON_IMAGE_PATH = os.path.join("images/game", "icon.gif")
-ICON = pygame.image.load(ICON_IMAGE_PATH)
 
 BACKGROUND_IMAGE_PATH = os.path.join("images/game", "background.jpg")
 BACKGROUND = pygame.transform.scale(pygame.image.load(

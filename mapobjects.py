@@ -7,6 +7,7 @@ from game import *
 from thread import *
 from network import *
 from config import *
+from angle_tools import AngleTools
 
 
 class MapObject:
@@ -21,19 +22,28 @@ class MapObject:
         self.movement_direction_angle = random.randint(0, 360)
         self.movement = True
         self.out_of_map = False  # flag for adding new asteroids
+        self.colliding = False
 
     # object movement in random direction
     def random_movement(self):
-        velocity_x = math.cos(self.movement_direction_angle) * self.velocity
-        velocity_y = math.sin(self.movement_direction_angle) * self.velocity
-        if self.position_in_space(self.x + velocity_x, self.y + velocity_y) or self.out_of_map:
-            if self.position_in_space(self.x + velocity_x, self.y + velocity_y) and self.out_of_map:
+        velocity_x = math.sin(math.radians(
+            self.movement_direction_angle)) * self.velocity
+        velocity_y = math.cos(math.radians(
+            self.movement_direction_angle)) * self.velocity
+
+        in_space, orientation = self.position_in_space(self.x + velocity_x, self.y + velocity_y)
+
+        if in_space or self.out_of_map:
+            if in_space and self.out_of_map:
                 self.out_of_map = False
             self.x += velocity_x
             self.y += velocity_y
         else:
-            self.change_direction_of_movement()
-
+            if orientation == "right" or orientation == "left":
+                self.change_direction_of_movement(0)
+            else:
+                self.change_direction_of_movement(90)
+            
     # object movement to target position
     def target_movement(self, target):
         x = target[0] - self.x
@@ -47,6 +57,23 @@ class MapObject:
 
     # checking if the given coordinates are inside the space where object can move
     def position_in_space(self, x, y):
+        message = ""
+        in_space = True
+        if not (x - MIN_DISTANCE >= self.space.x):
+            message = "left"
+            in_space = False
+        elif not (x + self.width + MIN_DISTANCE <= (self.space.x + self.space.width)):
+            message = "right"
+            in_space = False
+        elif not (y - MIN_DISTANCE >= self.space.y):
+            message = "top"
+            in_space = False
+        elif not (y + self.height + MIN_DISTANCE <= (self.space.y + self.space.height)):
+            message = "bottom"
+            in_space = False
+        
+        return in_space, message
+
         return (x - MIN_DISTANCE >= self.space.x) and \
                (x + self.width + MIN_DISTANCE <= (self.space.x + self.space.width)) and \
                (y - MIN_DISTANCE >= self.space.y) and \
@@ -56,14 +83,65 @@ class MapObject:
     # return the same object with position after next move
     def next_move(self):
         result = copy.copy(self)
-        velocity_x = math.cos(self.movement_direction_angle) * self.velocity
-        velocity_y = math.sin(self.movement_direction_angle) * self.velocity
+        velocity_x = math.sin(math.radians(
+            self.movement_direction_angle)) * self.velocity
+        velocity_y = math.cos(math.radians(
+            self.movement_direction_angle)) * self.velocity
         result.x += velocity_x
         result.y += velocity_y
         return result
 
     # change direction of random movement of the object
-    def change_direction_of_movement(self):
+    def change_direction_of_movement(self, collider):
+        angle_tools = AngleTools()
+
+        if collider == 0 or collider == 90:
+            self.movement_direction_angle = angle_tools.calculate_bounce_angle(
+            self.movement_direction_angle, collider)
+            return
+
+
+        quadrant = None
+        x, y = self.get_position()
+        collider_x, collider_y = collider.get_position()
+        if x <= collider_x and y < collider_y:
+            quadrant = 1
+        elif x < collider_x and y >= collider_y:
+            quadrant = 2
+        elif x >= collider_x and y > collider_y:
+            quadrant = 3
+        else:
+            quadrant = 4
+
+        center = pygame.Vector2((x + self.width/2, y + self.height/2))
+        collider_center = pygame.Vector2(
+            (collider_x + collider.width/2, collider_y + collider.height/2))
+        distance = abs(center.distance_to(collider_center))
+        distance_x = abs(collider_x - x)
+        distance_y = abs(collider_y - y)
+
+        if quadrant == 3 or quadrant == 1:
+            cos = distance_y/distance
+        else:
+            cos = distance_x/distance
+
+        if cos > 1:
+            cos = 1
+
+        new_angle = math.degrees(math.acos(cos))
+        new_angle = math.floor(new_angle) + (quadrant - 1) * 90
+
+        perpendicular = angle_tools.add_angles(new_angle, 90)
+        result = angle_tools.calculate_bounce_angle(
+            self.movement_direction_angle, perpendicular)
+
+        result_collider = angle_tools.calculate_bounce_angle(
+            collider.movement_direction_angle, perpendicular)
+
+        self.movement_direction_angle = result
+        collider.movement_direction_angle = result_collider
+
+    def change_direction_of_movement_old(self):
         self.movement_direction_angle = random.randint(0, 360)
 
     # return position in the form of tuple
@@ -83,7 +161,17 @@ class MapObject:
             (other_obj.x + other_obj.width/2, other_obj.y + other_obj.height/2))
         oth_object_radius = other_obj.width / 2
         distance = object_center.distance_to(oth_object_center)
-        return distance < object_radius + oth_object_radius
+
+        next_obj = self.next_move()
+        next_oth_obj = other_obj.next_move()
+
+        object_center_next = pygame.Vector2(
+            (next_obj.x + next_obj.width/2, next_obj.y + next_obj.height/2))
+        oth_object_center_next = pygame.Vector2(
+            (next_oth_obj.x + next_oth_obj.width/2, next_oth_obj.y + next_oth_obj.height/2))
+        next_distance = object_center_next.distance_to(oth_object_center_next)
+
+        return distance <= (object_radius + oth_object_radius) and distance > next_distance
 
 
 class Asteroid(MapObject):
@@ -95,7 +183,7 @@ class Asteroid(MapObject):
                            WINDOW_HEIGHT - MIN_DISTANCE - 40)
         # asteroid can move everywhere in the window space
         space = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-        super().__init__(x, y, 40, 40, 100, space, 1)
+        super().__init__(x, y, 40, 40, 100, space, 1.5)
         self.image_id = image_id
         self.out_of_map = out_of_map
 
@@ -111,7 +199,7 @@ class Missile(MapObject):
     def __init__(self, player_id, x, y):
         # missile can move everywhere in the window space
         space = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-        super().__init__(x, y, 20, 16, 5, space, 3)
+        super().__init__(x, y, 20, 16, 5, space, 10)
         self.player_id = player_id
 
     # missile moves horizontally in proper direction

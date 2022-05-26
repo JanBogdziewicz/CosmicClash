@@ -22,7 +22,7 @@ asteroids = []
 
 
 def add_new_asteroid():
-    new_asteroid = Asteroid(randrange(9), True)
+    new_asteroid = Asteroid(randrange(9), True)  # 9
     new_asteroid.x = random.randint(2*PLAYER_SPACE_WIDTH,
                                     WINDOW_WIDTH - 2*PLAYER_SPACE_WIDTH)
     new_asteroid.y = random.choice([- MIN_DISTANCE - 40,
@@ -77,6 +77,7 @@ def server_thread():
         # move asteroids
         for asteroid_id in range(len(asteroids)):
             asteroid = asteroids[asteroid_id]
+
             # check for collisions with other asteroids
             for other_asteroid_id in range(asteroid_id + 1, len(asteroids)):
                 other_asteroid = asteroids[other_asteroid_id]
@@ -87,11 +88,13 @@ def server_thread():
                         asteroids.remove(other_asteroid)
                     add_new_asteroid()
                 elif asteroid.collides_with(other_asteroid):
-                    asteroid.change_direction_of_movement()
-                    other_asteroid.change_direction_of_movement()
-                    if asteroid.next_move().collides_with(other_asteroid.next_move()):
-                        asteroid.movement = False
-                        other_asteroid.movement = False
+                    # asteroid.change_direction_of_movement()
+                    # other_asteroid.change_direction_of_movement()
+                    asteroid.change_direction_of_movement(other_asteroid)
+                    # if asteroid.next_move().collides_with(other_asteroid.next_move()):
+                    #     asteroid.movement = False
+                    #     other_asteroid.movement = False
+                    pass
             # check for collisions with ships
             for player in players:
                 for ship in player.fleet:
