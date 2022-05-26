@@ -7,25 +7,27 @@ from mapobjects import *
 from config import *
 
 
-# client send to server data about his player and new objects created by him
+# client send to server data about player and his connection and new objects created by him
 class MessageFromClientToServer:
-    def __init__(self, player, player_new_missiles):
+    def __init__(self, player_connected, player, player_new_missiles):
+        self.player_connected = player_connected
         self.player = player
         self.player_new_missiles = player_new_missiles
 
     def unpack(self):
-        return self.player, self.player_new_missiles
+        return self.player_connected, self.player, self.player_new_missiles
 
 
-# server send to client data about another player and all objects on the game map
+# server send to client data about another player and his connection and all objects on the game map
 class MessageFromServerToClient:
-    def __init__(self, player, missiles, asteroids):
+    def __init__(self, player_connected, player, missiles, asteroids):
+        self.player_connected = player_connected
         self.player = player
         self.missiles = missiles
         self.asteroids = asteroids
 
     def unpack(self):
-        return self.player, self.missiles, self.asteroids
+        return self.player_connected, self.player, self.missiles, self.asteroids
 
 
 class Network:

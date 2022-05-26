@@ -9,8 +9,9 @@ from config import *
 class Game:
     def __init__(self):
         self.game_started = False
+        self.player_connected = False
         self.window = self.create_window()
-        self.start_button = Button(self.start_game, self.window)
+        self.start_button = Button(self.connect_player, self.window)
 
     # create game window
     def create_window(self):
@@ -19,9 +20,9 @@ class Game:
         pygame.display.set_icon(ICON)
         return window
 
-    # change state of the game
-    def start_game(self):
-        self.game_started = True
+    # change state of the player connection
+    def connect_player(self):
+        self.player_connected = True
 
     # draw game map
     def draw_game(self, map_objects):
@@ -39,10 +40,22 @@ class Game:
         self.start_button.draw()
         pygame.display.update()
 
+    # draw waiting screen until both players connect
+    def draw_wait_screen(self):
+        self.window.fill(WHITE)
+        self.window.blit(BACKGROUND, (0, 0))
+        text = FONT.render(
+            "Waiting for second player to connect...", False, BLACK)
+        text_rect = text.get_rect(center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2))
+        self.window.blit(text, text_rect)
+        pygame.display.update()
+
     # draw either menu or game map on the window
     def draw_window(self, map_objects):
-        if self.game_started:
+        if self.game_started and self.player_connected:
             self.draw_game(map_objects)
+        elif self.player_connected:
+            self.draw_wait_screen()
         else:
             self.draw_menu()
 

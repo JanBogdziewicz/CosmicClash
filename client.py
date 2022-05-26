@@ -40,12 +40,13 @@ if __name__ == '__main__':
         thread = find_main_thread(ship_threads)
 
         # send data to server
-        data_to_send = MessageFromClientToServer(player1, player1_new_missiles)
+        data_to_send = MessageFromClientToServer(
+            game.player_connected, player1, player1_new_missiles)
         player1_new_missiles = []
 
         # data retrieved from server
         data_retrieved = net.send(data_to_send)
-        player2, missiles, asteroids = data_retrieved.unpack()
+        game.game_started, player2, missiles, asteroids = data_retrieved.unpack()
 
         # check for ships collision
         for player in [player1, player2]:

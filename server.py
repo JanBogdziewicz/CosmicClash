@@ -13,6 +13,7 @@ from config import *
 server = "127.0.0.1"
 port = 5555
 
+players_conn = [False, False]
 players = [Player(0), Player(1)]
 missiles = []
 asteroids = []
@@ -44,7 +45,7 @@ def client_thread(connection_, player_id):
         try:
             # data retrieved from the client
             data_retrieved = pickle.loads(connection_.recv(8192))
-            players[player_id], player_new_missiles = data_retrieved.unpack()
+            players_conn[player_id], players[player_id], player_new_missiles = data_retrieved.unpack()
 
             # checking if connection is active
             if not data_retrieved:
@@ -58,7 +59,7 @@ def client_thread(connection_, player_id):
 
             # sent data to the client
             data_to_send = MessageFromServerToClient(
-                players[another_player_id], missiles, asteroids)
+                players_conn[another_player_id], players[another_player_id], missiles, asteroids)
             connection_.sendall(pickle.dumps(data_to_send))
 
         except:
@@ -138,6 +139,7 @@ def server_thread():
 
 if __name__ == '__main__':
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_thread_running = False
 
     number_of_asteroids = 15
     asteroids = [Asteroid(randrange(9), False)
@@ -169,13 +171,15 @@ if __name__ == '__main__':
     print("Waiting for a connection, Server Started")
 
     while True:
-        connection, address = soc.accept()
-        available_players.sort()
-        current_player_id = available_players[0]
-        available_players.remove(current_player_id)
+        if available_players:
+            connection, address = soc.accept()
+            available_players.sort()
+            current_player_id = available_players[0]
+            available_players.remove(current_player_id)
 
-        print(f"Player {current_player_id} connected to: {address}")
+            print(f"Player {current_player_id} connected to: {address}")
 
-        start_new_thread(client_thread, (connection, current_player_id))
-        if len(available_players) == 1:
+            start_new_thread(client_thread, (connection, current_player_id))
+        if all(players_conn) and not server_thread_running:
             start_new_thread(server_thread, ())
+            server_thread_running = True
