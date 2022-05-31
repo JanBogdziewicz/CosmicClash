@@ -48,6 +48,7 @@ class ShipThread(threading.Thread):
         self.ship = ship
         self.token = token
         self.main = False
+        self.running = True
 
         self.formation = False
         self.formation_leader_position = (0, 0)
@@ -91,7 +92,7 @@ class ShipThread(threading.Thread):
 
     def run(self):
         clock = pygame.time.Clock()
-        while True:
+        while self.running:
             clock.tick(60)
 
             # player controls the movement of the ship through the keyboard

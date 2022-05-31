@@ -10,6 +10,8 @@ class Game:
     def __init__(self):
         self.game_started = False
         self.player_connected = False
+        self.game_over = False
+        self.game_outcome = ""
         self.window = self.create_window()
         self.start_button = Button(self.connect_player, self.window)
 
@@ -50,9 +52,27 @@ class Game:
         self.window.blit(text, text_rect)
         pygame.display.update()
 
-    # draw either menu or game map on the window
+    # draw end screen on game end
+    def draw_end_screen(self):
+        self.window.fill(WHITE)
+        self.window.blit(BACKGROUND, (0, 0))
+        text1 = FONT.render(
+            "GAME OVER", False, BLACK)
+        text2 = FONT.render(
+            self.game_outcome, False, BLACK)
+        text_rect1 = text1.get_rect(
+            center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2 - 2*MIN_DISTANCE))
+        text_rect2 = text2.get_rect(
+            center=(WINDOW_WIDTH/2, WINDOW_HEIGHT/2 + 2*MIN_DISTANCE))
+        self.window.blit(text1, text_rect1)
+        self.window.blit(text2, text_rect2)
+        pygame.display.update()
+
+    # draw either menu, waiting, ending screen or game map on the window
     def draw_window(self, map_objects):
-        if self.game_started and self.player_connected:
+        if self.game_over:
+            self.draw_end_screen()
+        elif self.game_started and self.player_connected:
             self.draw_game(map_objects)
         elif self.player_connected:
             self.draw_wait_screen()

@@ -49,31 +49,56 @@ if __name__ == '__main__':
         game.game_started, player2, missiles, asteroids = data_retrieved.unpack()
 
         # check for ships collision
-        for player in [player1, player2]:
-            for ship_id in range(len(player.fleet)):
-                ship = player.fleet[ship_id]
-                # check for collision with other ships
-                for other_ship_id in range(ship_id + 1, len(player.fleet)):
-                    other_ship = player.fleet[other_ship_id]
-                    if ship.collides_with(other_ship):
-                        ship.change_direction_of_movement(other_ship)
-                        if thread:
-                            if ship == thread.ship:
-                                ship.movement = False
-                # check for collisions with asteroids
-                for asteroid in asteroids:
-                    if ship.collides_with(asteroid):
-                        ship.hp -= 20
-                # check for collisions with missiles
-                for missile in missiles:
-                    if ship.collides_with(missile) and missile.player_id != player.player_id:
-                        ship.hp -= 20
-                # reload if not on cooldown and if not at full ammo
-                if not ship.reload_cooldown and ship.ammo < PLAYER_AMMO:
-                    ship.reload_cooldown = AMMO_RELOAD_TIME
-                    ship.ammo += 1
-                elif ship.ammo < PLAYER_AMMO:
-                    ship.reload_cooldown -= 1
+        ship_number = len(player1.fleet)
+        ship_id = 0
+        while ship_id < ship_number:
+            ship = player1.fleet[ship_id]
+            # check for collision with other ships
+            for other_ship_id in range(ship_id + 1, len(player1.fleet)):
+                other_ship = player1.fleet[other_ship_id]
+                if ship.collides_with(other_ship):
+                    ship.change_direction_of_movement(other_ship)
+                    if thread:
+                        if ship == thread.ship:
+                            ship.movement = False
+            # check for collisions with asteroids
+            for asteroid in asteroids:
+                if ship.collides_with(asteroid):
+                    ship.hp -= 20
+            # check for collisions with missiles
+            for missile in missiles:
+                if ship.collides_with(missile) and missile.player_id != player1.player_id:
+                    ship.hp -= 20
+            # reload if not on cooldown and if not at full ammo
+            if not ship.reload_cooldown and ship.ammo < PLAYER_AMMO:
+                ship.reload_cooldown = AMMO_RELOAD_TIME
+                ship.ammo += 1
+            elif ship.ammo < PLAYER_AMMO:
+                ship.reload_cooldown -= 1
+            # remove destoryed ships and stop their threads
+            if ship.hp <= 0:
+                player1.fleet.remove(ship)
+                thread = find_thread_by_id(ship_threads, ship.ship_id)
+                if thread is not None:
+                    if thread.main:
+                        thread.token.put(True)
+                        thread.main = False
+                        if ships_in_formation:
+                            for ship_thread in ship_threads:
+                                ship_thread.release_formation()
+                            ships_in_formation = False
+                    thread.running = False
+                    ship_threads.remove(thread)
+                ship_id -= 1
+                ship_number -= 1
+            ship_id += 1
+        # check if player has any ships in fleet if not end game
+        if not player1.fleet:
+            game.game_over = True
+            game.game_outcome = "You lost!!!"
+        elif not player2.fleet:
+            game.game_over = True
+            game.game_outcome = "Congratulations, you won!!!"
 
         for event in pygame.event.get():
             # fire missile by commander ship
