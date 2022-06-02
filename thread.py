@@ -4,6 +4,8 @@ from game import *
 from network import *
 from mapobjects import *
 from config import *
+import random
+from queue import Queue
 
 # keyboards responsible for threads control
 THREAD_KEYS = {
@@ -40,8 +42,9 @@ def find_formation_leader(ship_threads):
 
 
 class ShipThread(threading.Thread):
-    def __init__(self, player_id, thread_id, ship, token):
+    def __init__(self, player_id, thread_id, ship, token, player=None):
         threading.Thread.__init__(self)
+        self.player = player
         self.player_id = player_id
         self.thread_id = thread_id
         self.ship_threads = None
@@ -53,25 +56,23 @@ class ShipThread(threading.Thread):
         self.formation = False
         self.formation_leader_position = (0, 0)
         self.position_in_formation = 0
+        self.random_shot_ready = False
+        self.random_shot_cooldown = random.randint(50, 250)
 
     # change main flag
     # if thread was main remove the token and add it to the pool
-    # if thread wan't main get token from pool or current main
+    # if thread wasn't main get token from pool or current main
     def change_thread(self, ship_threads):
         if self.main:
-            self.token.put(True)
             self.ship.color = RED
             self.main = False
-        elif self.token.empty():
-            main_thread = find_main_thread(ship_threads)
-            main_thread.token.put(True)
-            main_thread.ship.color = RED
-            main_thread.main = False
-
-            self.main = self.token.get()
-            self.ship.color = GREEN
         else:
-            self.main = self.token.get()
+            main_thread = find_main_thread(ship_threads)
+            if main_thread is not None:
+                main_thread.ship.color = RED
+                main_thread.main = False
+            
+            self.main = True
             self.ship.color = GREEN
 
     # set ships in the formation
@@ -90,10 +91,35 @@ class ShipThread(threading.Thread):
     def set_formation_leader_position(self, position):
         self.formation_leader_position = position
 
+    # shoot missile 
+    def shoot_missile(self, velocity=None):
+        if self.formation:
+            for ship in self.player.fleet:
+                self.token.put((self.thread_id, "shoot"))
+            
+        self.token.put(self.ship.shoot_missile(velocity))
+
     def run(self):
         clock = pygame.time.Clock()
         while self.running:
             clock.tick(60)
+
+            # check thread information
+            if not self.token.empty():
+                current_token = self.token.get()
+                if isinstance(current_token, tuple):
+                    if current_token[0] != self.thread_id:
+                        if current_token[1] == "shoot":             
+                            self.token.put(self.ship.shoot_missile(10))
+                else:
+                    self.token.put(current_token)
+        
+            # control the cooldown of random shot
+            if self.random_shot_cooldown > 0:
+                self.random_shot_cooldown -= 1
+            elif not self.main and not self.formation:
+                self.token.put(self.ship.shoot_missile())
+                self.random_shot_cooldown = random.randint(50, 250)
 
             # player controls the movement of the ship through the keyboard
             if self.main and not self.formation:

@@ -19,8 +19,6 @@ missiles = []
 asteroids = []
 
 # adding new asteroids if one of the existing ones is destroyed
-
-
 def add_new_asteroid():
     new_asteroid = Asteroid(randrange(9), True)  # 9
     new_asteroid.x = random.randint(2*PLAYER_SPACE_WIDTH,

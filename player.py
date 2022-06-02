@@ -6,7 +6,7 @@ from thread import *
 from network import *
 from mapobjects import *
 from config import *
-
+from mapobjects import Ship
 
 class Player:
     def __init__(self, player_id):

@@ -20,11 +20,10 @@ if __name__ == '__main__':
     game = Game()
 
     # creating and starting threads for each ship
-    token = Queue(maxsize=1)
-    token.put(True)
+    token = Queue()
     ship_threads = []
     for idx, ship in enumerate(player1.fleet):
-        ship_thread = ShipThread(player1.player_id, idx + 1, ship, token)
+        ship_thread = ShipThread(player1.player_id, idx + 1, ship, token, player=player1)
         ship_thread.start()
         ship_threads.append(ship_thread)
 
@@ -36,6 +35,8 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     while running_program:
         clock.tick(60)
+        
+
         # finding main thread
         thread = find_main_thread(ship_threads)
 
@@ -43,6 +44,14 @@ if __name__ == '__main__':
         data_to_send = MessageFromClientToServer(
             game.player_connected, player1, player1_new_missiles)
         player1_new_missiles = []
+
+        # thread messages
+        if not token.empty():
+            current_token = token.get()
+            if isinstance(current_token, Missile):
+                player1_new_missiles.append(current_token)
+            else:
+                token.put(current_token)
 
         # data retrieved from server
         data_retrieved = net.send(data_to_send)
@@ -81,7 +90,6 @@ if __name__ == '__main__':
                 thread = find_thread_by_id(ship_threads, ship.ship_id)
                 if thread is not None:
                     if thread.main:
-                        thread.token.put(True)
                         thread.main = False
                         if ships_in_formation:
                             for ship_thread in ship_threads:
@@ -104,7 +112,16 @@ if __name__ == '__main__':
             # fire missile by commander ship
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 if thread is not None and thread.ship.ammo > 0:
-                    player1_new_missiles.append(thread.ship.shoot_missile())
+                    # if ships_in_formation:
+                    #     for ship in player1.fleet:
+                    #         player1_new_missiles.append(ship.shoot_missile(velocity=10))
+                    # else:
+                    #     player1_new_missiles.append(thread.ship.shoot_missile())
+                    if ships_in_formation:
+                        thread.shoot_missile(velocity=10)
+                    else:
+                        thread.shoot_missile()
+                
 
             # change commander ship
             if event.type == pygame.KEYDOWN and event.key in list(THREAD_KEYS.values()):

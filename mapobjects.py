@@ -172,7 +172,7 @@ class MapObject:
         oth_object_center_next = pygame.Vector2(
             (next_oth_obj.x + next_oth_obj.width/2, next_oth_obj.y + next_oth_obj.height/2))
         next_distance = object_center_next.distance_to(oth_object_center_next)
-
+        
         return distance <= (object_radius + oth_object_radius) and distance > next_distance
 
 
@@ -198,10 +198,10 @@ class Asteroid(MapObject):
 
 
 class Missile(MapObject):
-    def __init__(self, player_id, x, y):
+    def __init__(self, player_id, x, y, velocity=5):
         # missile can move everywhere in the window space
         space = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-        super().__init__(x, y, 20, 16, 5, space, 5)
+        super().__init__(x, y, 20, 16, 5, space, velocity)
         self.player_id = player_id
 
     # missile moves horizontally in proper direction
@@ -265,12 +265,15 @@ class Ship(MapObject):
             if in_space:
                 self.x += self.velocity
 
-    def shoot_missile(self):
+    def shoot_missile(self, velocity=None):
         # if player is on the left side of the window, create missile on the right side of the ship and conversely
         x = self.x + self.width / 2 if self.player_id == 0 else self.x - self.width / 2
         # remove one ammo from ship magazine
         self.ammo -= 1
-        return Missile(self.player_id, x, self.y + self.height / 2 - MIN_DISTANCE / 2)
+        if velocity is None:
+            return Missile(self.player_id, x, self.y + self.height / 2 - MIN_DISTANCE / 2)
+        else:
+            return Missile(self.player_id, x, self.y + self.height / 2 - MIN_DISTANCE / 2, velocity=velocity)
 
     def draw_id(self, window, hb_position):
         id_text = FONT_ID.render(str(self.ship_id), False, self.color)
