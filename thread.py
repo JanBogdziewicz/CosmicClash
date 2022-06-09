@@ -117,9 +117,10 @@ class ShipThread(threading.Thread):
             # control the cooldown of random shot
             if self.random_shot_cooldown > 0:
                 self.random_shot_cooldown -= 1
+            '''
             elif not self.main and not self.formation:
                 self.token.put(self.ship.shoot_missile())
-                self.random_shot_cooldown = random.randint(50, 250)
+                self.random_shot_cooldown = random.randint(50, 250)'''
 
             # player controls the movement of the ship through the keyboard
             if self.main and not self.formation:

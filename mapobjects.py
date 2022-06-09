@@ -77,12 +77,6 @@ class MapObject:
 
         return in_space, message
 
-        return (x - MIN_DISTANCE >= self.space.x) and \
-               (x + self.width + MIN_DISTANCE <= (self.space.x + self.space.width)) and \
-               (y - MIN_DISTANCE >= self.space.y) and \
-               (y + self.height + MIN_DISTANCE <=
-                (self.space.y + self.space.height))
-
     # return the same object with position after next move
     def next_move(self):
         result = copy.copy(self)
@@ -274,6 +268,12 @@ class Ship(MapObject):
             return Missile(self.player_id, x, self.y + self.height / 2 - MIN_DISTANCE / 2)
         else:
             return Missile(self.player_id, x, self.y + self.height / 2 - MIN_DISTANCE / 2, velocity=velocity)
+
+    def is_coming_asteroid(self, asteroid):
+        x_distance = asteroid.x - (self.x + self.width) if self.player_id == 0 else self.x - (asteroid.x + asteroid.width)
+        if 100 > x_distance > 0 and abs(self.y - asteroid.y) < 50:
+            return True
+        return False
 
     def draw_id(self, window, hb_position):
         id_text = FONT_ID.render(str(self.ship_id), False, self.color)

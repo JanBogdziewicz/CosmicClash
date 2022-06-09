@@ -35,7 +35,6 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     while running_program:
         clock.tick(60)
-        
 
         # finding main thread
         thread = find_main_thread(ship_threads)
@@ -101,12 +100,20 @@ if __name__ == '__main__':
                 ship_number -= 1
             ship_id += 1
         # check if player has any ships in fleet if not end game
-        if not player1.fleet:
+        if not player1.fleet and not game.game_over:
             game.game_over = True
             game.game_outcome = "You lost!!!"
-        elif not player2.fleet:
+        elif not player2.fleet and not game.game_over:
             game.game_over = True
             game.game_outcome = "Congratulations, you won!!!"
+
+        # autonomous missile firing by ships
+        for thread in ship_threads:
+            if not thread.main:
+                for asteroid in asteroids:
+                    if thread.ship.is_coming_asteroid(asteroid) and thread.random_shot_cooldown == 0:
+                        thread.shoot_missile()
+                        thread.random_shot_cooldown = 10
 
         for event in pygame.event.get():
             # fire missile by commander ship
@@ -121,7 +128,6 @@ if __name__ == '__main__':
                         thread.shoot_missile(velocity=10)
                     else:
                         thread.shoot_missile()
-                
 
             # change commander ship
             if event.type == pygame.KEYDOWN and event.key in list(THREAD_KEYS.values()):
