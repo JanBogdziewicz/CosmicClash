@@ -108,12 +108,12 @@ if __name__ == '__main__':
             game.game_outcome = "Congratulations, you won!!!"
 
         # autonomous missile firing by ships
-        for thread in ship_threads:
-            if not thread.main:
+        for ship_thread in ship_threads:
+            if not ship_thread.main:
                 for asteroid in asteroids:
-                    if thread.ship.is_coming_asteroid(asteroid) and thread.random_shot_cooldown == 0:
-                        thread.shoot_missile()
-                        thread.random_shot_cooldown = 10
+                    if ship_thread.ship.is_coming_asteroid(asteroid) and ship_thread.random_shot_cooldown == 0 and not ship_thread.formation:
+                        ship_thread.shoot_missile()
+                        ship_thread.random_shot_cooldown = 10
 
         for event in pygame.event.get():
             # fire missile by commander ship
