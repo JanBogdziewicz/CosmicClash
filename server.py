@@ -86,13 +86,8 @@ def server_thread():
                         asteroids.remove(other_asteroid)
                     add_new_asteroid()
                 elif asteroid.collides_with(other_asteroid):
-                    # asteroid.change_direction_of_movement()
-                    # other_asteroid.change_direction_of_movement()
                     asteroid.change_direction_of_movement(other_asteroid)
-                    # if asteroid.next_move().collides_with(other_asteroid.next_move()):
-                    #     asteroid.movement = False
-                    #     other_asteroid.movement = False
-                    pass
+
             # check for collisions with ships
             for player in players:
                 for ship in player.fleet:

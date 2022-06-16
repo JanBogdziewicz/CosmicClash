@@ -119,13 +119,8 @@ if __name__ == '__main__':
             # fire missile by commander ship
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 if thread is not None and thread.ship.ammo > 0:
-                    # if ships_in_formation:
-                    #     for ship in player1.fleet:
-                    #         player1_new_missiles.append(ship.shoot_missile(velocity=10))
-                    # else:
-                    #     player1_new_missiles.append(thread.ship.shoot_missile())
                     if ships_in_formation:
-                        thread.shoot_missile(velocity=10)
+                        thread.shoot_missile(velocity=16)
                     else:
                         thread.shoot_missile()
 

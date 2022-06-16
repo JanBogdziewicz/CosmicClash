@@ -179,7 +179,7 @@ class Asteroid(MapObject):
                            WINDOW_HEIGHT - MIN_DISTANCE - 40)
         # asteroid can move everywhere in the window space
         space = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
-        super().__init__(x, y, 40, 40, 100, space, 1.5)
+        super().__init__(x, y, 40, 40, 100, space, 2)
         self.image_id = image_id
         self.out_of_map = out_of_map
 
@@ -192,7 +192,7 @@ class Asteroid(MapObject):
 
 
 class Missile(MapObject):
-    def __init__(self, player_id, x, y, velocity=5):
+    def __init__(self, player_id, x, y, velocity=8):
         # missile can move everywhere in the window space
         space = pygame.Rect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT)
         super().__init__(x, y, 20, 16, 5, space, velocity)
@@ -226,7 +226,7 @@ class Ship(MapObject):
         # ship can move everywhere in the player space
         space_x = 0 if player_id == 0 else WINDOW_WIDTH - PLAYER_SPACE_WIDTH
         space = pygame.Rect(space_x, 0, PLAYER_SPACE_WIDTH, WINDOW_HEIGHT)
-        super().__init__(x, y, 45, 35, 100, space, 2)
+        super().__init__(x, y, 45, 35, 100, space, 4)
         self.ship_id = ship_id
         self.player_id = player_id
         self.color = color
